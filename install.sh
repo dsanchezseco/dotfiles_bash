@@ -33,6 +33,7 @@ fi
 # then add the content of concat2bashrc to the .bashrc file
 cat $THIS_DIR/concat2bashrc >> $HOME/${CONFIG_FILE}
 
+source $HOME/${CONFIG_FILE}
 
 #OPTIONAL TODO: ask if use artifactory to create or not and populate the vars
 cp $THIS_DIR/artifactory_creds $HOME/.artifactory_creds
