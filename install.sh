@@ -21,6 +21,9 @@ cp $THIS_DIR/git_branch_info.sh $HOME/.git_branch_info.sh
 cp $THIS_DIR/bash_aliases $HOME/.bash_aliases
 cp $THIS_DIR/artifactory_creds $HOME/.artifactory_creds
 
+# get the bash completion
+curl -L https://raw.github.com/git/git/master/contrib/completion/git-prompt.sh > ~/.bash_git
+
 # if there's a backup of .bashrc override the content of the original
 # else create the backup
 if [ -e $HOME/${CONFIG_FILE}.bak ]
