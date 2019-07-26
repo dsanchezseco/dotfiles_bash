@@ -23,5 +23,7 @@ alias pip="pip3"
 
 alias tree="tree -I .git -a"
 
+alias search="grep -rnwe"
+
 # aditional exports
 export PATH=$HOME/bin:$HOME/.local/bin:$PATH
