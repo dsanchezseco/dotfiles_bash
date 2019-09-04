@@ -2,7 +2,6 @@
 # export AWS credentials for given profile
 aws.load_credentials() {
 
-
   _unset() { unset AWS_PROFILE AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY ; }
   _hint() { echo && echo "[HINT] Use '-1' to unload current session" ; }
 
@@ -11,6 +10,7 @@ aws.load_credentials() {
   profiles=$(grep -o '\[.*\]' ~/.aws/credentials | tr -d "][" )
   more_profiles=$(grep -o '\[.*\]' ~/.aws/config | tr -d "][" | cut -d' ' -f2)
   profiles="$(echo $profiles $more_profiles | tr ' ' '\n' | grep -v 'default' | sort -u | xargs)"
+
   chosen_profile=$1
   if [ -z "${chosen_profile}" ] ; then
     echo "You need to choose one AWS profile from this list:"  && echo "${profiles}"
@@ -39,18 +39,17 @@ aws.load_credentials() {
 
     export AWS_PROFILE=${chosen_profile}
   else
-    echo "Creating new temmporary session with MFA token..."
-    cross_account_role=$(aws configure get x_role_arn --profile $chosen_profile)
+    echo "Creating new temporary session with MFA token..."
+    cross_account_role=$(aws configure get role_arn --profile $chosen_profile)
     [ -z "${cross_account_role}" ] && \
-      echo "[ERROR] you need to configure chosen role ARN as 'x_role_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
+      echo "[ERROR] you need to configure chosen role ARN as 'role_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
       return 4
-
-    mfa_iam=$(aws configure get x_mfa_serial --profile $chosen_profile)
-    [ -z "${cross_account_role}" ] && \
-      echo "[ERROR] you need to configure your MFA ARN as 'x_mfa_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
+    mfa_iam=$(aws configure get mfa_serial --profile $chosen_profile)
+    [ -z "${mfa_iam}" ] && \
+      echo "[ERROR] you need to configure your MFA ARN as 'mfa_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
       return 5
 
-    temp_keys=($(aws sts assume-role --role-arn $cross_account_role --role-session-name session-$1 --serial-number $mfa_iam --token-code $mfa_token --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text))
+    temp_keys=($(aws sts assume-role --profile $chosen_profile --role-arn $cross_account_role --role-session-name session-$1 --serial-number $mfa_iam --token-code $mfa_token --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text))
     [ $? -ne 0 ] && return -1
 
     export AWS_PROFILE=${chosen_profile}
