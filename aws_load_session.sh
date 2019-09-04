@@ -67,3 +67,16 @@ aws.load_credentials() {
     aws configure set aws_session_token ${aws_session_token}
   fi
 }
+
+
+## example of $HOME/.aws/config
+#   [profile block]
+#   x_role_arn = arn:aws:iam::[...]
+#   region = eu-west-1
+#   source_profile = block
+
+## example of $HOME/.aws/credentials
+#   [block]
+#   mfa_serial = arn:aws:iam::[...]
+#   aws_access_key_id = [...]
+#   aws_secret_access_key = [...]
