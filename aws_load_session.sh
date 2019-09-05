@@ -40,11 +40,11 @@ aws.load_credentials() {
     export AWS_PROFILE=${chosen_profile}
   else
     echo "Creating new temporary session with MFA token..."
-    cross_account_role=$(aws configure get role_arn --profile $chosen_profile)
+    cross_account_role=$(aws configure get x_role_arn --profile $chosen_profile)
     [ -z "${cross_account_role}" ] && \
       echo "[ERROR] you need to configure chosen role ARN as 'role_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
       return 4
-    mfa_iam=$(aws configure get mfa_serial --profile $chosen_profile)
+    mfa_iam=$(aws configure get x_mfa_serial --profile $chosen_profile)
     [ -z "${mfa_iam}" ] && \
       echo "[ERROR] you need to configure your MFA ARN as 'mfa_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
       return 5
@@ -71,12 +71,11 @@ aws.load_credentials() {
 
 ## example of $HOME/.aws/config
 #   [profile block]
+#   x_mfa_serial = arn:aws:iam::[...]
 #   x_role_arn = arn:aws:iam::[...]
 #   region = eu-west-1
-#   source_profile = block
 
 ## example of $HOME/.aws/credentials
 #   [block]
-#   mfa_serial = arn:aws:iam::[...]
 #   aws_access_key_id = [...]
 #   aws_secret_access_key = [...]
