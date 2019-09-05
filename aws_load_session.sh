@@ -32,27 +32,27 @@ aws.load_credentials() {
     echo "MFA token is missing, loading previous session..."
     _hint
 
-    aws_access_key_id=$(aws configure get aws_access_key_id --profile ${chosen_profile})
+    aws_access_key_id=$(aws configure get aws_access_key_id --profile session-${chosen_profile})
     [ -z "${aws_access_key_id}" ] && \
       echo && echo "[ERROR] No credentials found, you need to authenticate again" && \
       return 3
 
-    export AWS_PROFILE=${chosen_profile}
+    export AWS_PROFILE=session-${chosen_profile}
   else
     echo "Creating new temporary session with MFA token..."
     cross_account_role=$(aws configure get x_role_arn --profile $chosen_profile)
     [ -z "${cross_account_role}" ] && \
-      echo "[ERROR] you need to configure chosen role ARN as 'role_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
+      echo "[ERROR] you need to configure chosen role ARN as 'x_role_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
       return 4
     mfa_iam=$(aws configure get x_mfa_serial --profile $chosen_profile)
     [ -z "${mfa_iam}" ] && \
-      echo "[ERROR] you need to configure your MFA ARN as 'mfa_arn' in ~/.aws/config, under [profile ${chosen_profile}" && \
+      echo "[ERROR] you need to configure your MFA ARN as 'x_mfa_serial' in ~/.aws/config, under [profile ${chosen_profile}" && \
       return 5
 
-    temp_keys=($(aws sts assume-role --profile $chosen_profile --role-arn $cross_account_role --role-session-name session-$1 --serial-number $mfa_iam --token-code $mfa_token --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text))
+    temp_keys=($(aws sts assume-role --profile $chosen_profile --role-arn $cross_account_role --role-session-name session-${chosen_profile} --serial-number $mfa_iam --token-code $mfa_token --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' --output text))
     [ $? -ne 0 ] && return -1
 
-    export AWS_PROFILE=${chosen_profile}
+    export AWS_PROFILE=session-${chosen_profile}
 
     aws_access_key_id=${temp_keys[0]}
     export AWS_ACCESS_KEY_ID=${aws_access_key_id}
@@ -71,11 +71,12 @@ aws.load_credentials() {
 
 ## example of $HOME/.aws/config
 #   [profile block]
-#   x_mfa_serial = arn:aws:iam::[...]
 #   x_role_arn = arn:aws:iam::[...]
+#   x_mfa_serial = arn:aws:iam::[...]
 #   region = eu-west-1
 
 ## example of $HOME/.aws/credentials
 #   [block]
 #   aws_access_key_id = [...]
 #   aws_secret_access_key = [...]
+#   [session-block] #IMPORTATN!!!
